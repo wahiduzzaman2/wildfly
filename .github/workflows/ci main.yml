@@ -1,0 +1,47 @@
+name: Flaky test run
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+      
+  run_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
+      - name: Run Test
+        run: mvn -pl dist test -Dtest='org.wildfly.dist.subsystem.xml.StandardConfigsXMLValidationUnitTestCase.testStandaloneMinimalistic'
+                
+  run_test_with_nondex:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: 11
+        
+    - name: Run Test w nondex
+      run: mvn -pl dist edu.illinois:nondex-maven-plugin:1.1.2:nondex -Dtest='org.wildfly.dist.subsystem.xml.StandardConfigsXMLValidationUnitTestCase.testStandaloneMinimalistic'
+      
+    
